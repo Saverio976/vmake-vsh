@@ -27,6 +27,11 @@ pub fn (args Args) execute_rule(rule string) ! {
 	return error("vmake: *** No rule to make target '${rule}'.  Stop.")
 }
 
+pub fn (args Args) execute_shell(cmd string) ! {
+	println(cmd)
+	os.execute_opt(cmd)!
+}
+
 fn main() {
 	args, no_matches := flag.using[Args](Args{}, os.args, skip: 1) or {
 		eprintln('ERROR: ${err}')
@@ -51,5 +56,5 @@ fn (r Rules) all(args Args) ! {
 
 fn (r Rules) target(args Args) ! {
 	println('Building project!')
-	return error('Error foo bar')
+	args.execute_shell(@VEXE + ' -prod .')!
 }

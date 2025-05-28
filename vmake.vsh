@@ -43,10 +43,10 @@ pub fn (args Args) execute_rule(rule string) !bool {
 		mut method_name := arrays.find_first[string](method.attrs, fn (e string) bool {
 			return e.starts_with('name: ')
 		}) or { method.name }
-		if method_name.starts_with('name :') {
+		if method_name.starts_with('name: ') {
 			method_name = method_name.after('name: ')
 		}
-		if method.name == rule {
+		if method_name == rule {
 			mut really_execute := false
 			if _ := arrays.find_first[string](method.attrs, fn (e string) bool {
 				return e.starts_with('phony')
@@ -110,10 +110,8 @@ pub fn (args Args) check_and_run_deps(rule string, deps []string) !bool {
 				dep_stat_set = false
 			}
 		}
-		eprintln('Checking ${rule} with dep ${dep}...')
 		res := args.execute_rule(dep) or { return error("${err}  Needed by '${rule}'.") }
 		if res {
-			eprintln('updated')
 			updated = true
 		}
 		dep_mtime := dep_stat.mtime

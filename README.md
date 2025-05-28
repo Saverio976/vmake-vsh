@@ -10,7 +10,7 @@
 
 ## Example
 
-```go
+```rust
 // content of the file
 
 @[deps: 'vmake']

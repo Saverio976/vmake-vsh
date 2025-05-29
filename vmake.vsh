@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 // https://github.com/Saverio976/vmake-vsh
-
 import flag
 import os
 import arrays
+import time
 
 struct Rules {
 }
@@ -123,10 +123,20 @@ pub fn (args Args) check_and_run_deps(rule string, deps []string) !bool {
 	return updated
 }
 
-pub fn (args Args) sh(cmd string) ! {
+@[params]
+struct ShParams {
+	timeit bool
+}
+
+pub fn (args Args) sh(cmd string, opts ShParams) ! {
 	println(cmd)
+	mut stopwatch := time.new_stopwatch()
 	res := os.execute_opt(cmd)!
+	stopwatch.stop()
 	print(res.output)
+	if opts.timeit {
+		eprintln('vmake: *** sh time ${stopwatch.elapsed()}')
+	}
 }
 
 fn main() {
@@ -159,12 +169,13 @@ fn main() {
 fn (r Rules) all(args Args) ! {
 }
 
-@[name: 'vmake'; deps: 'vmake.v	v.mod']
+@[deps: 'vmake.v	v.mod']
+@[name: 'vmake']
 fn (r Rules) target(args Args) ! {
 	args.sh(@VEXE + ' -prod .')!
 }
 
 @[phony]
 fn (r Rules) fmt(args Args) ! {
-	args.sh(@VEXE + ' fmt -w .')!
+	args.sh(@VEXE + ' fmt -w .', timeit: true)!
 }

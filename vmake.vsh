@@ -125,15 +125,23 @@ pub fn (args Args) check_and_run_deps(rule string, deps []string) !bool {
 
 @[params]
 struct ShParams {
-	timeit bool
+	timeit      bool
+	show_stdout bool = true
+	show_cmd    bool = true
 }
 
 pub fn (args Args) sh(cmd string, opts ShParams) ! {
-	println(cmd)
-	mut stopwatch := time.new_stopwatch()
+	if opts.show_cmd {
+		println(cmd)
+	}
+	mut stopwatch := if opts.timeit { time.new_stopwatch() } else { time.StopWatch{} }
 	res := os.execute_opt(cmd)!
-	stopwatch.stop()
-	print(res.output)
+	if opts.timeit {
+		stopwatch.stop()
+	}
+	if opts.show_stdout {
+		print(res.output)
+	}
 	if opts.timeit {
 		eprintln('vmake: *** sh time ${stopwatch.elapsed()}')
 	}

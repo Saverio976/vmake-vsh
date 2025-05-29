@@ -33,6 +33,31 @@ struct Rules {
 struct Args {
 	directory string = os.getwd() @[short: C]
 	jobs      int    = 1    @[short: j]
+	show_help bool @[long: help; short: h]
+}
+
+pub fn (args Args) list_rules() map[string][]string {
+	mut res := map[string][]string{}
+	$for method in Rules.methods {
+		mut method_name := arrays.find_first[string](method.attrs, fn (e string) bool {
+			return e.starts_with('name: ')
+		}) or { method.name }
+		if method_name.starts_with('name: ') {
+			method_name = method_name.after('name: ')
+		}
+		if _ := arrays.find_first[string](method.attrs, fn (e string) bool {
+			return e.starts_with('phony')
+		})
+		{
+			res[method_name] = []string{}
+		} else if deps := arrays.find_first[string](method.attrs, fn (e string) bool {
+			return e.starts_with('deps: ')
+		})
+		{
+			res[method_name] = deps.after('deps: ').fields()
+		}
+	}
+	return res
 }
 
 pub fn (args Args) execute_rule(rule string) !bool {
@@ -156,6 +181,27 @@ fn main() {
 		}
 		eprintln(doc)
 		exit(2)
+	}
+	if args.show_help {
+		doc := flag.to_doc[Args]() or {
+			eprintln('vmake: *** For some reason when creating the documentation')
+			return
+		}
+		println(doc)
+		rules := args.list_rules()
+		if rules.len != 0 {
+			println('')
+			println('Rules:')
+			for rule, deps in rules {
+				print('  ${rule}')
+				if deps.len != 0 {
+					println(' : ${deps.join(", ")}')
+				} else {
+					println('')
+				}
+			}
+		}
+		return
 	}
 	for rule in no_matches {
 		args.execute_rule(rule) or {

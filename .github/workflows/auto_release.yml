@@ -1,0 +1,54 @@
+name: Auto Release
+
+on:
+  push:
+    branches: main
+
+jibs:
+  release-create:
+    permissions: write-all
+    runs-on: ubuntu-latest
+
+    outputs:
+      release: ${{ steps.release.outputs.release_tag }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: release
+        name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [[ "${{ github.ref }}" == 'refs/heads/main' ]]; then
+            export GITHUB_OUTPUT=$GITHUB_OUTPUT
+            bash ./.github/workflows/release_tag.sh "${{ env.BRANCH }}"
+          else
+            echo "release_tag=0.0.0" >> $GITHUB_OUTPUT
+          fi
+
+  release:
+    needs: [release-create]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Vlang
+        run: |
+          mkdir -p build-deps
+          git clone --depth=1 https://github.com/vlang/v build-deps/v
+          make -C build-deps/v
+
+      - name: Pack
+        run: ./build-deps/v/v .github/workflows/pack.vsh vmake.vsh
+
+      - name: Upload
+        if: github.ref == 'refs/heads/main'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ needs.release-create.outputs.release }} ./vmake.vsh

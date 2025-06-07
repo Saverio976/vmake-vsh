@@ -45,7 +45,7 @@ jobs:
           make -C build-deps/v
 
       - name: Pack
-        run: ./build-deps/v/v .github/workflows/pack.vsh vmake.vsh
+        run: ./build-deps/v/v run .github/workflows/pack.vsh vmake.vsh
 
       - name: Upload
         if: github.ref == 'refs/heads/main'

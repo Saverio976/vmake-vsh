@@ -50,7 +50,7 @@ jobs:
       - name: Upload
         if: github.ref == 'refs/heads/main'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ls vmake.vsh
           cat vmake.vsh

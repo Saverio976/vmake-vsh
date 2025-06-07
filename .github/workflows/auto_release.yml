@@ -31,6 +31,8 @@ jobs:
           fi
 
   release:
+    permissions:
+      contents: write
     needs: [release-create]
     runs-on: ubuntu-latest
 

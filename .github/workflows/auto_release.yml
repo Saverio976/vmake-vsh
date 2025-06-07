@@ -4,7 +4,7 @@ on:
   push:
     branches: main
 
-jibs:
+jobs:
   release-create:
     permissions: write-all
     runs-on: ubuntu-latest

@@ -24,7 +24,7 @@ fn main() {
 			for rule, deps in rules {
 				print('  ${rule}')
 				if deps.len != 0 {
-					println(' : ${deps.join(", ")}')
+					println(' : ${deps.join(', ')}')
 				} else {
 					println('')
 				}

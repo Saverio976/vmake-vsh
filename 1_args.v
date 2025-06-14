@@ -5,7 +5,7 @@ import time
 struct Args {
 	directory string = os.getwd() @[short: C]
 	jobs      int    = 1    @[short: j]
-	show_help bool @[long: help; short: h]
+	show_help bool   @[long: help; short: h]
 }
 
 pub fn (args Args) list_rules[T]() map[string][]string {
